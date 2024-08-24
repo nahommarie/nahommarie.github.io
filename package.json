@@ -1,0 +1,12 @@
+{
+  "name": "matrix",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "BUN_ENV=development bun --hot run server.js",
+    "serve": "bun run server.js"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}
