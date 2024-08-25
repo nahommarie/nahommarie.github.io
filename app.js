@@ -1,5 +1,5 @@
 // Global variables
-// ...
+let spotifyToken = null;
 
 // Global functions
 
@@ -7,12 +7,12 @@ const projects = [
   {
     name: "Project Pokédex",
     progress: 20,
-    description: "A simple CLI for seeing pokemon info",
+    description: "A CLI for pokemon info",
   },
   {
-    name: "Project Beta",
+    name: "Project Listener's Block",
     progress: 50,
-    description: "Blockchain-based supply chain solution",
+    description: "Music for your exact mood",
   },
   { name: "Project Gamma", progress: 30, description: "IoT smart home system" },
 ];
@@ -23,13 +23,11 @@ const asciiArt = {
 
   Project Pokédex
     `,
-  "Project Beta": `
- ______
-|      |
-|  []  |
-|______|
- /    \\
-/      \\
+  "Project Listener's Block": `
+     ♪
+   ♫  
+  ♪♪
+     o(^_^)o
     `,
   "Project Gamma": `
    _____
@@ -71,6 +69,158 @@ function selectProject(project) {
   showProject(project);
 }
 
+function handleSubmitSpotifyRecs(_event) {
+  const danceability = Number(
+    document.getElementById("input-danceability").value
+  );
+  if (isNaN(danceability)) {
+    alert("Please enter a valid number for danceability.");
+    return;
+  }
+  // const valence = document.getElementById("valence").value;
+  // const energy = document.getElementById("energy").value;
+  // const tempo = document.getElementById("tempo").value;
+
+  const baseApiURL = "https://api.spotify.com/v1/recommendations";
+  const urlParams = new URLSearchParams({
+    min_danceability: Math.max(danceability - 20, 1) / 100,
+    max_danceability: Math.min(danceability + 20, 100) / 100,
+    limit: 10,
+    seed_genres: "pop",
+    // valence,
+  });
+  const apiURL = `${baseApiURL}?${urlParams.toString()}`;
+  const params = {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${spotifyToken}`,
+    },
+  };
+
+  return fetch(apiURL, params)
+    .then((response) => response.json())
+    .then((data) => {
+      console.log(">>> recs data: ", data);
+
+      // data: seeds, tracks
+      // show tracks info
+
+      const tracks = data.tracks;
+
+      const recTracksContainer = document.createElement("div");
+      recTracksContainer.id = "rec-tracks-container";
+
+      tracks.forEach((track) => {
+        const trackDiv = document.createElement("div");
+        trackDiv.className = "rec-track";
+
+        const img = document.createElement("img");
+        img.src = track.album.images[0].url;
+        img.alt = track.name;
+        img.width = 100;
+        img.height = 100;
+
+        const artistsNames = document.createElement("p");
+        artistsNames.textContent = track.artists
+          .map((artist) => artist.name)
+          .join(", ");
+
+        const trackName = document.createElement("p");
+        trackName.textContent = track.name;
+
+        const playLink = document.createElement("a");
+        playLink.href = track.uri;
+        playLink.textContent = "Play now";
+
+        trackDiv.appendChild(img);
+        trackDiv.appendChild(artistsNames);
+        trackDiv.appendChild(trackName);
+        trackDiv.appendChild(playLink);
+
+        recTracksContainer.appendChild(trackDiv);
+      });
+
+      document
+        .getElementById("project-content")
+        .appendChild(recTracksContainer);
+    })
+    .catch((error) => {
+      console.error("Error fetching Spotify recommendations:", error);
+    });
+}
+
+function setInitialListenersBlockContent(project) {
+  const contentSection = document.getElementById("project-content");
+  contentSection.innerHTML = `
+  <div>
+  <div class="number-input"> Danceability <input id="input-danceability" type="number" min="1" max="100" /> </div>
+  <button id="submit-spotify-recs" >Submit</button>
+  </div>
+  `;
+
+  document
+    .getElementById("submit-spotify-recs")
+    .addEventListener("click", handleSubmitSpotifyRecs);
+}
+
+function fetchSpotifyToken() {
+  const cachedToken = localStorage.getItem("spotifyToken");
+  const cachedTimestamp = localStorage.getItem("spotifyTokenTimestamp");
+  const currentTime = Date.now();
+
+  if (
+    cachedToken &&
+    cachedTimestamp &&
+    currentTime - parseInt(cachedTimestamp) < 3600000
+  ) {
+    // Token is still valid (less than 1 hour old)
+    spotifyToken = cachedToken;
+    return;
+  }
+
+  var client_id = "83ccfdd2e4c0440492db71303eabdc40";
+  var client_secret = "fb80b15f6bf74e7cad74e0443566ce0a";
+
+  var authOptions = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization: "Basic " + btoa(client_id + ":" + client_secret),
+    },
+    body: new URLSearchParams({
+      grant_type: "client_credentials",
+    }),
+  };
+
+  return fetch("https://accounts.spotify.com/api/token", authOptions)
+    .then((res) => {
+      console.log(">>> raw spotify API res: ", res);
+      return res.json().then((data) => {
+        console.log(">>> chained spotify res: ", data);
+        spotifyToken = data.access_token;
+        localStorage.setItem("spotifyToken", spotifyToken);
+        localStorage.setItem("spotifyTokenTimestamp", Date.now().toString());
+      });
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+}
+
+function showInitialProjectContent(project) {
+  const contentSection = document.getElementById("project-content");
+
+  switch (project.name) {
+    case "Project Listener's Block":
+      // Add code to fetch API token and display it
+      fetchSpotifyToken();
+      setInitialListenersBlockContent(project);
+      break;
+    default:
+      return;
+  }
+}
+
 // show project, hides it if it's the current project
 function showProject(project) {
   const asciiDisplay = document.getElementById("ascii-display");
@@ -92,6 +242,9 @@ function showProject(project) {
     asciiDisplay.style.opacity = 1;
     projectDescription.style.opacity = 1;
   }, 50);
+
+  // show initial project data in project content area:
+  showInitialProjectContent(project);
 }
 
 function createParticles() {
