@@ -1,8 +1,13 @@
+// Global variables
+// ...
+
+// Global functions
+
 const projects = [
   {
-    name: "Project Alpha",
-    progress: 80,
-    description: "A cutting-edge AI project",
+    name: "Project Pokédex",
+    progress: 20,
+    description: "A simple CLI for seeing pokemon info",
   },
   {
     name: "Project Beta",
@@ -13,12 +18,10 @@ const projects = [
 ];
 
 const asciiArt = {
-  "Project Alpha": `
-   /\\
-  /  \\
- /____\\
-/      \\
-  A I
+  "Project Pokédex": `
+   （╯°□°）╯︵◓
+
+  Project Pokédex
     `,
   "Project Beta": `
  ______
@@ -49,14 +52,35 @@ function createTerminal() {
                 <div class="progress glow" style="width: ${project.progress}%"></div>
             </div>
         `;
-    projectElement.addEventListener("click", () => showProject(project));
+    projectElement.addEventListener("click", () => selectProject(project));
     projectList.appendChild(projectElement);
   });
 }
 
+function updateCurrentProjectName(projectName) {
+  const currentProject = document.getElementById("current-project");
+  if (currentProject.textContent === projectName) {
+    currentProject.textContent = null;
+  } else {
+    currentProject.textContent = projectName;
+  }
+}
+
+function selectProject(project) {
+  updateCurrentProjectName(project.name);
+  showProject(project);
+}
+
+// show project, hides it if it's the current project
 function showProject(project) {
   const asciiDisplay = document.getElementById("ascii-display");
   const projectDescription = document.getElementById("project-description");
+
+  if (asciiDisplay.textContent === asciiArt[project.name]) {
+    asciiDisplay.textContent = null;
+    projectDescription.textContent = null;
+    return;
+  }
 
   asciiDisplay.textContent = asciiArt[project.name];
   projectDescription.textContent = project.description;
@@ -82,7 +106,71 @@ function createParticles() {
   }
 }
 
+function handleInput(event) {
+  console.log(">>> event tripped: ", event);
+  if (event.key === "Enter") {
+    var input = document.getElementById("command-input").value;
+    console.log(">>> input: ", input);
+    input = input.split(" ")[0].toLowerCase();
+
+    fetchPokemonData(input);
+  }
+}
+
+function updateJsonDisplay(data) {
+  const jsonDisplay = document.getElementById("project-content");
+  jsonDisplay.textContent = JSON.stringify(data, null, 2);
+}
+
+function updatePokemonProjectContent(data) {
+  // update project contents with:
+  // - number in dex (id)
+  // - name
+  // - image
+  // - types
+  // - description
+  // - cries (will need to intro local state)
+  const typesList = data.types.map((type) => type.type.name);
+  const types = typesList.join(", ");
+
+  const content = document.getElementById("project-content");
+  content.innerHTML = `
+    <div class="pokedex-content">
+      <h2>#${data.id} ${data.name}</h2>
+      <h4>${types.length > 1 ? "Types" : "Type"}: {${types}}</h4>
+      <img id="pokemon-image" src="${
+        data.sprites.front_default
+      }" alt="Pokemon Image">
+    </div>
+  `;
+}
+
+function fetchPokemonData(pokemonName) {
+  const apiUrl = `https://pokeapi.co/api/v2/pokemon/${pokemonName.toLowerCase()}`;
+
+  fetch(apiUrl)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Pokemon not found");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      updatePokemonProjectContent(data);
+    })
+    .catch((error) => {
+      // TODO: handle error
+      console.error("Error fetching Pokemon data:", error.message);
+      updateJsonDisplay({ error: error.message });
+    });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   createTerminal();
   createParticles();
+
+  // event listener for input commands
+  const inputElement = document.getElementById("command-input");
+  inputElement.addEventListener("keypress", handleInput);
+  // document.getElementById('command-input').addEventListener('keypress', handleInput);
 });

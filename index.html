@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Showcase Terminal</title>
     <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" type="module"></script>
   </head>
   <body>
     <div id="terminal-container">
@@ -17,10 +18,15 @@
             <pre id="ascii-display"></pre>
             <p id="project-description"></p>
           </div>
+          <div id="terminal-input">
+            <span id="prompt">$</span>
+            <span id="current-project"></span>
+            <input type="text" id="command-input" autofocus />
+          </div>
+        </div>
+        <div id="project-content">
         </div>
       </div>
-      <div id="waveform"></div>
     </div>
-    <script src="app.js" type="module"></script>
   </body>
-</html>
+</html>    
