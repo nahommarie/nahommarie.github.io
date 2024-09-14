@@ -77,14 +77,77 @@ function handleSubmitSpotifyRecs(_event) {
     alert("Please enter a valid number for danceability.");
     return;
   }
-  // const valence = document.getElementById("valence").value;
-  // const energy = document.getElementById("energy").value;
-  // const tempo = document.getElementById("tempo").value;
+
+  const minDurationSec = Number(
+    document.getElementById("input-min-duration").value
+  );
+  if (isNaN(minDurationSec)) {
+    alert("Please enter a valid number for minimum duration.");
+    return;
+  }
+
+  const maxDurationSec = Number(
+    document.getElementById("input-max-duration").value
+  );
+  if (isNaN(maxDurationSec)) {
+    alert("Please enter a valid number for maximum duration.");
+    return;
+  }
+
+  const energy = Number(document.getElementById("input-energy").value);
+  if (isNaN(energy)) {
+    alert("Please enter a valid number for energy.");
+    return;
+  }
+
+  const instrumentalness = Number(
+    document.getElementById("input-instrumentalness").value
+  );
+  if (isNaN(instrumentalness)) {
+    alert("Please enter a valid number for instrumentalness.");
+    return;
+  }
+
+  const minLoudness = Number(
+    document.getElementById("input-min-loudness").value
+  );
+  if (isNaN(minLoudness)) {
+    alert("Please enter a valid number for minimum loudness.");
+    return;
+  }
+
+  const maxLoudness = Number(
+    document.getElementById("input-max-loudness").value
+  );
+  if (isNaN(maxLoudness)) {
+    alert("Please enter a valid number for maximum loudness.");
+    return;
+  }
+
+  const minPopularity = Number(
+    document.getElementById("input-min-popularity").value
+  );
+  if (isNaN(minPopularity)) {
+    alert("Please enter a valid number for minimum popularity.");
+    return;
+  }
+
+  const maxPopularity = Number(
+    document.getElementById("input-max-popularity").value
+  );
+  if (isNaN(maxPopularity)) {
+    alert("Please enter a valid number for maximum popularity.");
+    return;
+  }
 
   const baseApiURL = "https://api.spotify.com/v1/recommendations";
   const urlParams = new URLSearchParams({
     min_danceability: Math.max(danceability - 20, 1) / 100,
     max_danceability: Math.min(danceability + 20, 100) / 100,
+    min_duration_ms: minDurationSec * 1000,
+    max_duration_ms: maxDurationSec * 1000,
+    min_energy: Math.max(energy - 20, 1) / 100,
+    max_energy: Math.min(energy + 20, 100) / 100,
     limit: 10,
     seed_genres: "pop",
     // valence,
@@ -154,6 +217,10 @@ function setInitialListenersBlockContent(project) {
   contentSection.innerHTML = `
   <div>
   <div class="number-input"> Danceability <input id="input-danceability" type="number" min="1" max="100" /> </div>
+  <div class="number-input"> Min duration (sec) <input id="input-min-duration" type="number" min="0" max="100" /> </div>
+  <div class="number-input"> Max duration (sec) <input id="input-max-duration" type="number" min="0" max="100" /> </div>
+  <div class="number-input"> Energy <input id="input-energy" type="number" min="1" max="100" /> </div>
+  <div class="number-input"> Instrumentalness <input id="input-instrumentalness" type="number" min="1" max="100" /> </div>
   <button id="submit-spotify-recs" >Submit</button>
   </div>
   `;
