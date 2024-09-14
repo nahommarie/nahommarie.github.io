@@ -6,7 +6,7 @@ html {
   font-family: "Courier New", monospace;
   background-color: #000;
   color: #0f0;
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 
 #terminal-container {
@@ -29,7 +29,8 @@ html {
   display: flex;
   flex-direction: row;
   max-width: 100wh;
-  overflow-x: scroll
+  overflow-x: scroll;
+  flex: 1;
 }
 
 .rec-track {
@@ -93,6 +94,7 @@ html {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
+  overflow: scroll;
 }
 
 #project-list,

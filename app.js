@@ -207,6 +207,11 @@ function fetchSpotifyToken() {
     });
 }
 
+function resetProjectContent() {
+  const contentSection = document.getElementById("project-content");
+  contentSection.innerHTML = "";
+}
+
 function showInitialProjectContent(project) {
   const contentSection = document.getElementById("project-content");
 
@@ -217,7 +222,7 @@ function showInitialProjectContent(project) {
       setInitialListenersBlockContent(project);
       break;
     default:
-      return;
+      resetProjectContent();
   }
 }
 
